@@ -1,39 +1,41 @@
-package com.example.smartbank;
+package com.example.smartbank; // Make sure this matches your actual package name!
 
 import java.util.HashMap;
 
 public class BankManager {
     private HashMap<String, BankAccount> accountsList;
 
-    // Setup manager
     public BankManager() {
         accountsList = new HashMap<>();
     }
 
-    // Add new account
     public void addAccount(BankAccount account) {
         accountsList.put(account.getAccountNumber(), account);
     }
 
-    // Check if account exists
     public boolean isAccountExists(String accountNumber) {
         return accountsList.containsKey(accountNumber);
     }
 
-    // Find account by ID
     public BankAccount findAccount(String accountNumber) {
         return accountsList.get(accountNumber);
     }
 
-    // Transfer between two managed accounts
+    // Updated: Automatically creates a target account if it doesn't exist (allows any ID to work)
     public void executeTransfer(String fromAccountNum, String toAccountNum, double amount)
             throws InsufficientFundException, InvalidAmountException {
 
         BankAccount sender = findAccount(fromAccountNum);
         BankAccount receiver = findAccount(toAccountNum);
 
-        if (sender == null || receiver == null) {
-            throw new IllegalArgumentException("One or both accounts do not exist");
+        // If receiver doesn't exist, we create a dummy account so the transfer works
+        if (receiver == null) {
+            receiver = new BankAccount(toAccountNum, "External User", 0.0);
+            addAccount(receiver);
+        }
+
+        if (sender == null) {
+            throw new IllegalArgumentException("Sender account does not exist");
         }
 
         sender.transfer(receiver, amount);

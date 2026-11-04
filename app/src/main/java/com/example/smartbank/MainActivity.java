@@ -1,5 +1,6 @@
-package com.example.smartbank;
+package com.example.smartbank; // Make sure this matches your actual package name!
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,25 +21,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Links to the XML layout
+        setContentView(R.layout.activity_main);
 
-        initSystem();
+        bankManager = new BankManager();
+
         bindUI();
         setupListeners();
-        updateUI();
+
+        // Ask for username on startup
+        askForUsername();
     }
 
-    // Create mock data
-    private void initSystem() {
-        bankManager = new BankManager();
-        currentAccount = new BankAccount("12345", "Israel Israeli", 1000.0);
-        BankAccount targetAccount = new BankAccount("67890", "Shlomo Artzi", 500.0);
+    // Shows a popup to get the user's name before initializing the account
+    private void askForUsername() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Welcome to Smartbank");
+        builder.setMessage("Please enter your name:");
 
-        bankManager.addAccount(currentAccount);
-        bankManager.addAccount(targetAccount);
+        final EditText input = new EditText(this);
+        builder.setView(input);
+
+        builder.setPositiveButton("Start", (dialog, which) -> {
+            String name = input.getText().toString();
+            if(name.isEmpty()) {
+                name = "Guest User";
+            }
+
+            // Initialize account with the chosen name
+            currentAccount = new BankAccount("12345", name, 1000.0);
+            bankManager.addAccount(currentAccount);
+
+            updateUI();
+        });
+
+        builder.setCancelable(false); // Forces the user to enter a name
+        builder.show();
     }
 
-    // Link code to screen components
     private void bindUI() {
         tvOwnerName = findViewById(R.id.tvOwnerName);
         tvAccountNumber = findViewById(R.id.tvAccountNumber);
@@ -53,22 +72,37 @@ public class MainActivity extends AppCompatActivity {
         btnHistory = findViewById(R.id.btnHistory);
     }
 
-    // Set click events for buttons
     private void setupListeners() {
 
+        // Added Deposit logic
+        btnDeposit.setOnClickListener(v -> {
+            if (currentAccount == null) return;
+            try {
+                double amount = Double.parseDouble(etAmount.getText().toString());
+                currentAccount.deposit(amount);
+
+                Toast.makeText(this, "Deposit successful!", Toast.LENGTH_SHORT).show();
+                etAmount.setText(""); // Clear input
+                updateUI();
+
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Error: Please enter a valid number", Toast.LENGTH_LONG).show();
+            } catch (InvalidAmountException e) {
+                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
         btnWithdraw.setOnClickListener(v -> {
+            if (currentAccount == null) return;
             boolean success = false;
             try {
-                // Parse amount from text input
-                String amountStr = etAmount.getText().toString();
-                double amount = Double.parseDouble(amountStr);
+                double amount = Double.parseDouble(etAmount.getText().toString());
 
-                // Arithmetic exception example
+                // Required ArithmeticException demonstration
                 if (amount == 0.123) {
                     int error = 10 / 0;
                 }
 
-                // Attempt to withdraw
                 currentAccount.withdraw(amount);
                 success = true;
 
@@ -76,30 +110,33 @@ public class MainActivity extends AppCompatActivity {
 
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Error: Please enter a valid number", Toast.LENGTH_LONG).show();
-            } catch (InsufficientFundException e) {
-                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            } catch (InvalidAmountException e) {
+            } catch (InsufficientFundException | InvalidAmountException e) {
                 Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             } catch (ArithmeticException e) {
                 Toast.makeText(this, "Math Error: Illegal calculation occurred", Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Toast.makeText(this, "Unexpected error occurred", Toast.LENGTH_LONG).show();
             } finally {
-                // Finally block runs no matter what
                 etAmount.setText("");
-                if (success) {
-                    updateUI();
-                }
+                if (success) updateUI();
             }
         });
 
         btnTransfer.setOnClickListener(v -> {
+            if (currentAccount == null) return;
             try {
                 double amount = Double.parseDouble(etAmount.getText().toString());
                 String targetId = etTargetAccount.getText().toString();
 
+                if (targetId.isEmpty()) {
+                    Toast.makeText(this, "Please enter a target account", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 bankManager.executeTransfer(currentAccount.getAccountNumber(), targetId, amount);
                 Toast.makeText(this, "Transfer successful!", Toast.LENGTH_SHORT).show();
+                etAmount.setText("");
+                etTargetAccount.setText("");
 
             } catch (NullPointerException e) {
                 Toast.makeText(this, "Error: Account data is missing", Toast.LENGTH_LONG).show();
@@ -113,19 +150,38 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnHistory.setOnClickListener(v -> {
+            if (currentAccount == null) return;
+
+            // 1. Keep the exception demonstration for the assignment requirement
             try {
-                // Try accessing a transaction that might not exist
-                Transaction t = currentAccount.getTransactionByIndex(100);
+                Transaction testTrans = currentAccount.getTransactionByIndex(9999);
             } catch (IndexOutOfBoundsException e) {
-                Toast.makeText(this, "No such transaction index exists", Toast.LENGTH_LONG).show();
+                // We caught it, now let's actually show the history below
             }
+
+            // 2. Actually display the transaction history in a popup dialog
+            StringBuilder historyText = new StringBuilder();
+            for (Transaction t : currentAccount.getAllTransactions()) {
+                historyText.append(t.toString()).append("\n\n");
+            }
+
+            if (historyText.length() == 0) {
+                historyText.append("No transactions made yet.");
+            }
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Transaction History")
+                    .setMessage(historyText.toString())
+                    .setPositiveButton("Close", null)
+                    .show();
         });
     }
 
-    // Refresh display values
     private void updateUI() {
-        tvOwnerName.setText("Hello, " + currentAccount.getOwnerName());
-        tvAccountNumber.setText("Account No: " + currentAccount.getAccountNumber());
-        tvBalance.setText("Current Balance: $" + currentAccount.getBalance());
+        if (currentAccount != null) {
+            tvOwnerName.setText("Hello, " + currentAccount.getOwnerName());
+            tvAccountNumber.setText("Account No: " + currentAccount.getAccountNumber());
+            tvBalance.setText("Current Balance: $" + currentAccount.getBalance());
+        }
     }
 }
