@@ -10,6 +10,9 @@ public class BankManager {
     }
 
     public void addAccount(BankAccount account) {
+        if(isAccountExists(account.getAccountNumber())) {
+            throw new IllegalArgumentException("Account ID already exists in the system!");
+        }
         accountsList.put(account.getAccountNumber(), account);
     }
 
@@ -21,21 +24,23 @@ public class BankManager {
         return accountsList.get(accountNumber);
     }
 
-    // Updated: Automatically creates a target account if it doesn't exist (allows any ID to work)
     public void executeTransfer(String fromAccountNum, String toAccountNum, double amount)
             throws InsufficientFundException, InvalidAmountException {
+
+        // תיקון: חסימת העברה לאותו החשבון
+        if (fromAccountNum.equals(toAccountNum)) {
+            throw new IllegalArgumentException("You cannot transfer money to your own account!");
+        }
 
         BankAccount sender = findAccount(fromAccountNum);
         BankAccount receiver = findAccount(toAccountNum);
 
-        // If receiver doesn't exist, we create a dummy account so the transfer works
+        // תיקון: זריקת שגיאה אם חשבון היעד לא קיים (במקום ליצור אותו)
         if (receiver == null) {
-            receiver = new BankAccount(toAccountNum, "External User", 0.0);
-            addAccount(receiver);
+            throw new IllegalArgumentException("Target account does not exist in the bank!");
         }
-
         if (sender == null) {
-            throw new IllegalArgumentException("Sender account does not exist");
+            throw new IllegalArgumentException("Sender account is missing!");
         }
 
         sender.transfer(receiver, amount);

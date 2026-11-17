@@ -1,90 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="top">
+    android:padding="16dp"
+    android:background="#F5F5F5">
 
-    <!-- App Title -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Smartbank"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"/>
+        android:orientation="vertical">
 
-    <!-- Account Details (tvOwnerName, tvAccountNumber, tvBalance) -->
-    <TextView
-        android:id="@+id/tvOwnerName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:text="Loading owner name..."/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Smartbank"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#1565C0"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
 
-    <TextView
-        android:id="@+id/tvAccountNumber"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"
-        android:text="Loading account number..."/>
+        <!-- Account Management Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
 
-    <TextView
-        android:id="@+id/tvBalance"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#2E7D32"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="24dp"
-        android:text="Balance: $0.0"/>
+            <Button
+                android:id="@+id/btnCreateAccount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="New Account"
+                android:layout_marginEnd="8dp"/>
 
-    <!-- User Inputs (etAmount, etTargetAccount) -->
-    <EditText
-        android:id="@+id/etAmount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter Amount ($)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="12dp"/>
+            <Button
+                android:id="@+id/btnSwitchAccount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Switch Account"/>
+        </LinearLayout>
 
-    <EditText
-        android:id="@+id/etTargetAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Target Account (For Transfer Only)"
-        android:inputType="text"
-        android:layout_marginBottom="24dp"/>
+        <!-- Current Account Details Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:elevation="4dp"
+            android:layout_marginBottom="24dp">
 
-    <!-- Action Buttons (btnDeposit, btnWithdraw, btnTransfer, btnHistory) -->
-    <Button
-        android:id="@+id/btnDeposit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Deposit Money"/>
+            <TextView
+                android:id="@+id/tvOwnerName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="No Account Selected"/>
 
-    <Button
-        android:id="@+id/btnWithdraw"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Withdraw Money"/>
+            <TextView
+                android:id="@+id/tvAccountNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:layout_marginTop="4dp"
+                android:text="ID: --"/>
 
-    <Button
-        android:id="@+id/btnTransfer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Transfer Money"/>
+            <TextView
+                android:id="@+id/tvBalance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:layout_marginTop="8dp"
+                android:text="Balance: $0.0"/>
+        </LinearLayout>
 
-    <Button
-        android:id="@+id/btnHistory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#546E7A"
-        android:text="View Transaction History"/>
+        <!-- Basic Actions -->
+        <EditText
+            android:id="@+id/etAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Amount ($)"
+            android:inputType="numberDecimal"
+            android:layout_marginBottom="8dp"/>
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <Button
+                android:id="@+id/btnDeposit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Deposit"
+                android:backgroundTint="#4CAF50"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnWithdraw"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#F44336"
+                android:text="Withdraw"/>
+        </LinearLayout>
+
+        <!-- Transfer Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Transfer Money"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <EditText
+                android:id="@+id/etTargetAccount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Target Account ID"
+                android:inputType="text"/>
+
+            <Button
+                android:id="@+id/btnVerifyTarget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Verify Info"
+                android:textSize="12sp"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnTransfer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Execute Transfer"
+            android:backgroundTint="#FF9800"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- History -->
+        <Button
+            android:id="@+id/btnHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#546E7A"
+            android:text="View Transaction History"/>
+
+    </LinearLayout>
+</ScrollView>

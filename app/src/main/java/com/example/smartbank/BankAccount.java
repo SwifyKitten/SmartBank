@@ -1,5 +1,4 @@
 package com.example.smartbank;
-
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -9,10 +8,9 @@ public class BankAccount {
     private double balance;
     private ArrayList<Transaction> transactions;
 
-    // Initialize account with empty transaction list
     public BankAccount(String accountNumber, String ownerName, double initialBalance) {
-        if (accountNumber == null || ownerName == null) {
-            throw new IllegalArgumentException("Account details cannot be null");
+        if (accountNumber == null || ownerName == null || accountNumber.isEmpty()) {
+            throw new IllegalArgumentException("Account details cannot be empty");
         }
         this.accountNumber = accountNumber;
         this.ownerName = ownerName;
@@ -20,58 +18,43 @@ public class BankAccount {
         this.transactions = new ArrayList<>();
     }
 
-    // Add money to account
     public void deposit(double amount) throws InvalidAmountException {
         if (amount <= 0) {
-            throw new InvalidAmountException("Deposit amount must be greater than zero");
+            throw new InvalidAmountException("Deposit amount must be greater than zero.");
+        }
+        if (amount > 1000000) { // בדיקה אוטומטית למניעת הלבנת הון/סכום חריג
+            throw new InvalidAmountException("Cannot deposit more than $1,000,000 at once.");
         }
         balance += amount;
-        transactions.add(new Transaction("Deposit", amount, new Date(), "Deposited to branch"));
+        transactions.add(new Transaction("Deposit", amount, new Date(), "Branch Deposit"));
     }
 
-    // Withdraw money with 'throws' declaration
     public void withdraw(double amount) throws InsufficientFundException, InvalidAmountException {
         if (amount <= 0) {
-            throw new InvalidAmountException("Withdrawal amount must be greater than zero");
+            throw new InvalidAmountException("Withdrawal amount must be greater than zero.");
         }
-        if (amount > balance) {
-            throw new InsufficientFundException("Not enough money in account");
+        // בדיקה אוטומטית קריטית - מניעת כניסה למינוס
+        if (balance - amount < 0) {
+            throw new InsufficientFundException("Transaction denied: Cannot go into negative balance. You are short by $" + (amount - balance));
         }
         balance -= amount;
         transactions.add(new Transaction("Withdrawal", amount, new Date(), "ATM Withdrawal"));
     }
 
-    // Transfer money to another account
     public void transfer(BankAccount target, double amount) throws InsufficientFundException, InvalidAmountException {
         if (target == null) {
-            throw new NullPointerException("Target account does not exist");
+            throw new NullPointerException("Target account does not exist.");
         }
+        this.withdraw(amount);
+        target.deposit(amount);
 
-        this.withdraw(amount); // Deduct from this account
-        target.deposit(amount); // Add to target account
-
-        this.transactions.add(new Transaction("Transfer Out", amount, new Date(), "Sent to " + target.getAccountNumber()));
+        this.transactions.add(new Transaction("Transfer Out", amount, new Date(), "Sent to " + target.getOwnerName()));
     }
 
-    // Get current balance
-    public double getBalance() {
-        return balance;
-    }
+    public double getBalance() { return balance; }
+    public String getAccountNumber() { return accountNumber; }
+    public String getOwnerName() { return ownerName; }
 
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    // Print account details to console
-    public void printDetails() {
-        System.out.println("Owner: " + ownerName + ", Account: " + accountNumber + ", Balance: " + balance);
-    }
-
-    // Get specific transaction
     public Transaction getTransactionByIndex(int index) {
         if (index < 0 || index >= transactions.size()) {
             throw new IndexOutOfBoundsException("Transaction index is invalid");
